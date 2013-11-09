@@ -8,5 +8,6 @@
     <string name="addr">IP address</string>
     <string name="port">Port</string>
     <string name="title_activity_display_response">DisplayResponseActivity</string>
+    <string name="text_hint"> </string>
 
 </resources>
