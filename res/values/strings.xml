@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GPSApp</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="send_button">Send</string>
+    <string name="addr">IP address</string>
+    <string name="port">Port</string>
+    <string name="title_activity_display_response">DisplayResponseActivity</string>
+
+</resources>
