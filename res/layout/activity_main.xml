@@ -20,6 +20,7 @@
    		    android:layout_height="wrap_content"
    		    android:ems="10"
    		    android:hint="@string/addr"
+   		    android:text="@string/host_addr"
    		    android:inputType="text" >
 
    		    <requestFocus />
@@ -32,6 +33,7 @@
         android:ems="10"
         android:inputType="number" 
         android:hint="@string/port" 
+        android:text="@string/host_port" 
         />
     
     <Button
