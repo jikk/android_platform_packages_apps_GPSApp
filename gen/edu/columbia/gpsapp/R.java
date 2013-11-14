@@ -46,6 +46,7 @@ public final class R {
         public static final int hello_world=0x7f050002;
         public static final int port=0x7f050005;
         public static final int send_button=0x7f050003;
+        public static final int text_hint=0x7f050007;
         public static final int title_activity_display_response=0x7f050006;
     }
     public static final class style {
