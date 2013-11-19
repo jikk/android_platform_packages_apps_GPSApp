@@ -11,5 +11,10 @@
     <string name="host_port">5000</string>
     <string name="title_activity_display_response">DisplayResponseActivity</string>
     <string name="text_hint"> </string>
-
+    <string name="country_prompt"> contries </string>
+    <string-array name="input_locations">
+        <item>GPS Location</item>
+        <item>Device unique ID</item>
+    </string-array>
+    
 </resources>

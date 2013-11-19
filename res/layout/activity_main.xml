@@ -14,6 +14,13 @@
    	    android:layout_height="wrap_content"
    	    android:orientation="vertical" >
 
+   	    <Spinner
+        	android:id="@+id/spinner1"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" 
+        	android:entries="@array/input_locations"
+        	android:prompt="@string/country_prompt" />
+   	    
    		<EditText
    		    android:id="@+id/addr"
    		    android:layout_width="wrap_content"
@@ -22,7 +29,6 @@
    		    android:hint="@string/addr"
    		    android:text="@string/host_addr"
    		    android:inputType="text" >
-
    		    <requestFocus />
    		</EditText>
 
