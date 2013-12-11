@@ -38,6 +38,7 @@ public class GPSTracker extends Service implements LocationListener {
 
 	public Location getLocation() {
         try {
+          Log.e("JIKK-GPS", "getLocation called");
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
  

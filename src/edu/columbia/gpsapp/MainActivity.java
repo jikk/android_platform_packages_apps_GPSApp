@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.Log;
 
 public class MainActivity extends Activity {
 	private GPSTracker gpsTracker;
@@ -36,6 +37,8 @@ public class MainActivity extends Activity {
     }
  
     public void sendMessage(View view) {        
+      Log.e("JIKK:", "sendMessage");
+        gpsTracker.getLocation();
         double latitude = gpsTracker.getLatitude();
         double longitude = gpsTracker.getLongitude();
         
