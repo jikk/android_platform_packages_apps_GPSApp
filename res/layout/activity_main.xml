@@ -64,5 +64,4 @@
         android:text="@string/text_hint"
         android:textAppearance="?android:attr/textAppearanceMedium" />    
     </LinearLayout>
-
 </RelativeLayout>
