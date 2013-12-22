@@ -11,21 +11,52 @@ import java.net.Socket;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnItemSelectedListener {
   private GPSTracker gpsTracker;
   private TextView textView;
+  private Spinner spinner;
+  private long spinnerId = -1;
+
+  public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+      // An item was selected. You can retrieve the selected item using
+      // parent.getItemAtPosition(pos)
+      Spinner spinner = (Spinner) parent;
+      if(spinner.getId() == R.id.spinner1)
+      {
+          Log.e("JIKK:", "onItemSelected: " + pos + ":" + id + ": spinner1:" +
+                  R.id.spinner1 + ":" + spinner.getId());
+
+          spinnerId = pos;
+      }
+      else
+      {
+        //do this
+      }
+  }
+
+  public void onNothingSelected(AdapterView<?> parent) {
+      // Another interface callback
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
+    spinner = (Spinner) findViewById(R.id.spinner1);
+    spinner.setOnItemSelectedListener(this);
     gpsTracker = new GPSTracker(this);
   }
 
@@ -46,11 +77,44 @@ public class MainActivity extends Activity {
     EditText portTxt = (EditText) findViewById(R.id.port);
     textView = (TextView) findViewById(R.id.textView1);
 
-    String msg = Double.toString(latitude) + "," + Double.toString(longitude);
+    if (spinnerId <0) {
+    } else {
+        String msg = String.valueOf(spinner.getSelectedItem());
 
-    SocketTask task = new SocketTask(this, ipAddrTxt.getText().toString(), portTxt.getText().toString());
-    task.execute(new String[] {msg});
+        if (spinnerId == 0) {  // Getting Location
+            msg += ":" + Double.toString(latitude) + "," + Double.toString(longitude);
+
+        } else if (spinnerId == 1) {
+            msg += ":" + findDeviceID();
+        }
+        SocketTask task = new SocketTask(this, ipAddrTxt.getText().toString(),
+                portTxt.getText().toString());
+        task.execute(new String[] {msg});
+    }
   }
+
+  private String findDeviceID() {
+    String deviceID = null;
+
+    TelephonyManager m_telephonyManager = (TelephonyManager)
+                getSystemService(Context.TELEPHONY_SERVICE);
+    int deviceType = m_telephonyManager.getPhoneType();
+
+    switch (deviceType) {
+        case (TelephonyManager.PHONE_TYPE_GSM):
+            break;
+        case (TelephonyManager.PHONE_TYPE_CDMA):
+            break;
+        case (TelephonyManager.PHONE_TYPE_NONE):
+            break;
+        default:
+            break;
+      }
+
+    deviceID = m_telephonyManager.getSubscriberId();
+
+      return deviceID;
+ }
 
   private class SocketTask extends AsyncTask<String, Void, String> {
     private Activity act;
@@ -84,7 +148,6 @@ public class MainActivity extends Activity {
           while((response = in.readLine()) != null) {
             ret += response;
           }
-
           client.close();
         } catch (IOException e) {
           return e.toString();
