@@ -102,18 +102,22 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
     switch (deviceType) {
         case (TelephonyManager.PHONE_TYPE_GSM):
-            break;
+          Log.e("JIKK:", "TelephonyManager.PHONE_TYPE_GSM");
+          break;
         case (TelephonyManager.PHONE_TYPE_CDMA):
-            break;
+          Log.e("JIKK:", "TelephonyManager.PHONE_TYPE_CDMA");
+          break;
         case (TelephonyManager.PHONE_TYPE_NONE):
-            break;
+          Log.e("JIKK:", "TelephonyManager.PHONE_TYPE_NONE");
+          break;
         default:
-            break;
+          Log.e("JIKK:", "TelephonyManager.default");
+          break;
       }
 
     deviceID = m_telephonyManager.getSubscriberId();
-
-      return deviceID;
+    Log.e("JIKK:", "deviceID:" + deviceID);
+    return deviceID;
  }
 
   private class SocketTask extends AsyncTask<String, Void, String> {
