@@ -72,6 +72,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     gpsTracker.getLocation();
     double latitude = gpsTracker.getLatitude();
     double longitude = gpsTracker.getLongitude();
+    String deviceID, country, mobileNetworkCode, countryID, mobileNetworkCodeID, msin;
 
     EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
     EditText portTxt = (EditText) findViewById(R.id.port);
@@ -85,7 +86,41 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             msg += ":" + Double.toString(latitude) + "," + Double.toString(longitude);
 
         } else if (spinnerId == 1) {
-            msg += ":" + findDeviceID();
+        	deviceID = findDeviceID();
+        	countryID = deviceID.substring(0, 2);
+        	mobileNetworkCodeID = deviceID.substring(3, 5);
+        	msin = deviceID.substring(6);
+        	if (countryID.compareTo("450") == 0) {
+        		country = "South Korea";
+        		if (mobileNetworkCodeID.compareTo("002") == 0)
+        			mobileNetworkCode = "KT";
+        		else if (mobileNetworkCodeID.compareTo("003") == 0)
+        			mobileNetworkCode = "Power 017";
+        		else
+        			mobileNetworkCode = "Unknown";
+        	} else if (deviceID.substring(0, 2).compareTo("234") == 0) {
+        		country = "Great Britain";
+        		if (mobileNetworkCodeID.compareTo("000") == 0)
+        			mobileNetworkCode = "BT";
+        		else if (mobileNetworkCodeID.compareTo("001") == 0)
+        			mobileNetworkCode = "Vectone Mobile";
+        		else
+        			mobileNetworkCode = "Unknown";
+        	} else if (deviceID.substring(0, 2).compareTo("310") == 0) {
+        		country = "USA";
+        		if (mobileNetworkCodeID.compareTo("053") == 0)
+        			mobileNetworkCode = "Virgin Mobile";
+        		else if (mobileNetworkCodeID.compareTo("054") == 0)
+        			mobileNetworkCode = "Alltel US";
+        		else
+        			mobileNetworkCode = "Unknown";
+        	} else {
+        		country = "Unknown";
+        		mobileNetworkCode = "Unknown";
+        	}
+        	msg += ": Country: " + country + " Mobile Network Code: " + mobileNetworkCode + " MSIN: " + msin;
+        		
+//            msg += ":" + findDeviceID();
         }
         SocketTask task = new SocketTask(this, ipAddrTxt.getText().toString(),
                 portTxt.getText().toString());
