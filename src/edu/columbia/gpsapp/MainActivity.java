@@ -175,8 +175,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
         } else if (spinnerId == 1) {
         	deviceID = findDeviceID();
-        	countryID = deviceID.substring(0, 2);
-        	mobileNetworkCodeID = deviceID.substring(3, 5);
+        	countryID = deviceID.substring(0, 3);
+        	mobileNetworkCodeID = deviceID.substring(3, 6);
         	msin = deviceID.substring(6);
         	if (countryID.compareTo("450") == 0) {
         		country = "South Korea";
@@ -186,7 +186,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         			mobileNetworkCode = "Power 017";
         		else
         			mobileNetworkCode = "Unknown";
-        	} else if (deviceID.substring(0, 2).compareTo("234") == 0) {
+        	} else if (countryID.compareTo("234") == 0) {
         		country = "Great Britain";
         		if (mobileNetworkCodeID.compareTo("000") == 0)
         			mobileNetworkCode = "BT";
@@ -194,7 +194,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         			mobileNetworkCode = "Vectone Mobile";
         		else
         			mobileNetworkCode = "Unknown";
-        	} else if (deviceID.substring(0, 2).compareTo("310") == 0) {
+        	} else if (countryID.compareTo("310") == 0) {
         		country = "USA";
         		if (mobileNetworkCodeID.compareTo("053") == 0)
         			mobileNetworkCode = "Virgin Mobile";
