@@ -7,11 +7,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,10 +32,15 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class MainActivity extends Activity implements OnItemSelectedListener {
+  final Context context = this;
   private GPSTracker gpsTracker;
   private TextView textView;
   private Spinner spinner;
   private long spinnerId = -1;
+  private long interval = 5;
+  AlertDialog.Builder builder;
+  private final int periodicDialogId = 100;
+  private ScheduledThreadPoolExecutor exec;
 
   public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
       // An item was selected. You can retrieve the selected item using
@@ -51,14 +64,53 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
   }
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
-    spinner = (Spinner) findViewById(R.id.spinner1);
-    spinner.setOnItemSelectedListener(this);
-    gpsTracker = new GPSTracker(this);
-  }
+		spinner = (Spinner) findViewById(R.id.spinner1);
+		spinner.setOnItemSelectedListener(this);
+		gpsTracker = new GPSTracker(this);
+		exec = new ScheduledThreadPoolExecutor(1);
+		builder = new AlertDialog.Builder(context);
+		builder.setTitle("Test");
+		builder.setMessage("HI");
+		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+
+			}
+		});
+		
+		builder.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				exec.shutdown();
+				dialog.cancel();
+
+			}
+		});
+		exec.scheduleWithFixedDelay (new Runnable() {
+
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						AlertDialog alertDialog =builder.create();
+						alertDialog.show();
+						
+					}
+				});
+				
+			}
+		}, 0, interval, TimeUnit.SECONDS);
+	}
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -233,7 +285,11 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     }
     @Override
       protected void onPostExecute(String result) {
-      textView.setText(result);
+
+    	Intent i = new Intent(MainActivity.this, ResultActivity.class);
+    	i.putExtra("result", result);
+    	startActivity(i);
+      //textView.setText(result);
     }
   }
 }
