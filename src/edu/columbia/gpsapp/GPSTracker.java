@@ -31,7 +31,7 @@ public class GPSTracker extends Service implements LocationListener {
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
 	 
 	// The minimum time between updates in milliseconds
-	private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+	private static final long MIN_TIME_BW_UPDATES = 1000 * 1 * 1; // 1 sec.
 	 
 	// Declaring a Location Manager
 	protected LocationManager locationManager;	
@@ -109,8 +109,7 @@ public class GPSTracker extends Service implements LocationListener {
 	@Override
 	public void onLocationChanged(Location arg0) {
 	    // TODO Auto-generated method stub
-	    latitude = arg0.getLatitude();
-	    longitude = arg0.getLongitude();
+        // Log.e("JIKK-GPS", "onLocationChanged");
 	}
 
 	@Override
@@ -128,7 +127,9 @@ public class GPSTracker extends Service implements LocationListener {
 	@Override
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
-
+        Log.e("JIKK-GPS", "onStatusChanged");
+	    latitude = arg0.getLatitude();
+	    longitude = arg0.getLongitude();
 	}
 
 	@Override
