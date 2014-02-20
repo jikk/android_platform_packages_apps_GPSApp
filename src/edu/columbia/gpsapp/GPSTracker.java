@@ -74,7 +74,8 @@ public class GPSTracker extends Service implements LocationListener {
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
                 	Log.e("JIKK-GPS", "GPS is enabled");
-                    if (location == null) {
+                    //if (location == null) {
+                    if (true) {
                     	Log.e("JIKK-GPS", "Location is null");
                         locationManager.requestLocationUpdates(
                                 LocationManager.GPS_PROVIDER,
@@ -93,6 +94,10 @@ public class GPSTracker extends Service implements LocationListener {
                             	Log.e("JIKK-GPS", "Location is null (2)");
                             }
                         }
+                    } else {
+                        Log.e("JIKK-GPS", "location is not null");
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
                     }
                 } else {
                 	Log.e("JIKK-GPS", "GPS is NOT enabled");
@@ -109,7 +114,9 @@ public class GPSTracker extends Service implements LocationListener {
 	@Override
 	public void onLocationChanged(Location arg0) {
 	    // TODO Auto-generated method stub
-        // Log.e("JIKK-GPS", "onLocationChanged");
+        Log.e("JIKK-GPS", "onLocationChanged");
+	    latitude = arg0.getLatitude();
+	    longitude = arg0.getLongitude();
 	}
 
 	@Override
@@ -128,8 +135,7 @@ public class GPSTracker extends Service implements LocationListener {
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
         Log.e("JIKK-GPS", "onStatusChanged");
-	    latitude = arg0.getLatitude();
-	    longitude = arg0.getLongitude();
+        getLocation();
 	}
 
 	@Override
