@@ -38,7 +38,7 @@ public class GPSTracker extends Service implements LocationListener {
 
 	public Location getLocation() {
         try {
-          Log.e("JIKK-GPS", "getLocation called");
+            Log.e("JIKK-GPS", "getLocation called");
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
  
@@ -75,7 +75,6 @@ public class GPSTracker extends Service implements LocationListener {
                 if (isGPSEnabled) {
                 	Log.e("JIKK-GPS", "GPS is enabled");
                     if (location == null) {
-                    	Log.e("JIKK-GPS", "Location is null");
                         locationManager.requestLocationUpdates(
                                 LocationManager.GPS_PROVIDER,
                                 MIN_TIME_BW_UPDATES,
@@ -98,11 +97,9 @@ public class GPSTracker extends Service implements LocationListener {
                 	Log.e("JIKK-GPS", "GPS is NOT enabled");
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
- 
         return location;
     }
 	
