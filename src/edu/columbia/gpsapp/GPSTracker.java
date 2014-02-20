@@ -74,30 +74,25 @@ public class GPSTracker extends Service implements LocationListener {
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
                 	Log.e("JIKK-GPS", "GPS is enabled");
-                    //if (location == null) {
-                    if (true) {
-                    	Log.e("JIKK-GPS", "Location is null");
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    Log.e("JIKK-GPS", "Location is null");
+                    locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
 
-                        if (locationManager != null) {
-                        	Log.e("JIKK-GPS", "LocationManager is not null");
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (location != null) {
-                            	Log.e("JIKK-GPS", "Location is not null (2)");
-                                latitude = location.getLatitude();
-                                longitude = location.getLongitude();
-                            } else {
-                            	Log.e("JIKK-GPS", "Location is null (2)");
-                            }
-                        }
-                    } else {
-                        Log.e("JIKK-GPS", "location is not null");
+                    if (locationManager != null) {
+                        Log.e("JIKK-GPS", "LocationManager is not null");
+                        location = locationManager
+                            .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        if (location != null) {
+                            Log.e("JIKK-GPS", "Location is not null (2)");
                             latitude = location.getLatitude();
                             longitude = location.getLongitude();
+                        } else {
+                        Log.e("JIKK-GPS", "Location is null (2)");
+                        }
+                    } else {
+                        Log.e("JIKK-GPS", "LocationManager is null");
                     }
                 } else {
                 	Log.e("JIKK-GPS", "GPS is NOT enabled");
