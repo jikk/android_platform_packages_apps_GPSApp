@@ -72,7 +72,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     gpsTracker.getLocation();
     double latitude = gpsTracker.getLatitude();
     double longitude = gpsTracker.getLongitude();
-    String deviceID, country, mobileNetworkCode, countryID, mobileNetworkCodeID, msin;
+    String deviceID, country, mobileNetworkCode, countryID, mobileNetworkCodeID, msin, city;
 
     EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
     EditText portTxt = (EditText) findViewById(R.id.port);
@@ -83,7 +83,43 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         String msg = String.valueOf(spinner.getSelectedItem());
 
         if (spinnerId == 0) {  // Getting Location
-            msg += ":" + Double.toString(latitude) + "," + Double.toString(longitude);
+        	if (latitude == 37.33 && longitude == 126.58) {
+        		country = "South Korea";
+        		city = "Seoul";
+        	} else if (latitude == 40.42 && longitude == 74.0) {
+        		country = "USA";
+        		city = "New York";
+        	} else if (latitude == 38.54 && longitude == 77.2) {
+        		country = "USA";
+        		city = "Washington";
+        	} else if (latitude == 37.59 && longitude == 23.43) {
+        		country = "Greece";
+        		city = "Athens";
+        	} else if (latitude == 40.25 && longitude == 3.42) {
+        		country = "Spain";
+        		city = "Madrid";
+        	} else if (latitude == 51.30 && longitude == 0.7) {
+        		country = "Great Britain";
+        		city = "London";
+        	} else if (latitude == 48.51 && longitude == 2.21) {
+        		country = "France";
+        		city = "Paris";
+        	} else if (latitude == 39.54 && longitude == 116.24) {
+        		country = "China";
+        		city = "Beijing";
+        	} else if (latitude == 41.53 && longitude == 12.28) {
+        		country = "Italy";
+        		city = "Rome";
+        	} else if (latitude == 35.41 && longitude == 139.41) {
+        		country = "Japan";
+        		city = "Tokyo";
+        	} else {
+        		country = "Unknown";
+        		city = "Unknown";
+        	}
+        	
+        	msg += ": Country: " + country + " city: " + city + " ->	 " + Double.toString(latitude) + "," + Double.toString(longitude); 
+        	//msg += ":" + Double.toString(latitude) + "," + Double.toString(longitude);
 
         } else if (spinnerId == 1) {
         	deviceID = findDeviceID();
@@ -118,7 +154,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         		country = "Unknown";
         		mobileNetworkCode = "Unknown";
         	}
-        	msg += ": Country: " + country + " Mobile Network Code: " + mobileNetworkCode + " MSIN: " + msin;
+        	msg += ": Country: " + country + " Mobile Network Code: " + mobileNetworkCode + " -> " + deviceID;
         		
 //            msg += ":" + findDeviceID();
         }
