@@ -7,40 +7,152 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.Date;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 
 public class MainActivity extends Activity implements OnItemSelectedListener {
+  //Const. variables to for message type.
+  final static int GPS_TYPE = 0;
+  final static int IMSI_TYPE = 1;
+  
   final Context context = this;
   private GPSTracker gpsTracker;
-  private TextView textView;
+  //private TextView textView;
   private Spinner spinner;
   private long spinnerId = -1;
   private long interval = 5;
-  AlertDialog.Builder builder;
-  private final int periodicDialogId = 100;
+  private AlertDialog.Builder builder;
   private ScheduledThreadPoolExecutor exec;
+  
+  class Msg {
+      int type = 0;
+      long msg_time;
+      String data;
+      
+      double latitude = 0.0;
+      double longitude = 0.0;
+      
+      public Msg(double lat_, double long_) {
+          type = GPS_TYPE;
+          msg_time = System.currentTimeMillis();
+          latitude = lat_;
+          longitude = long_;
+          
+          StringBuffer sb = new StringBuffer();
+          sb.append(lat_);
+          sb.append(":");
+          sb.append(long_);
+          data = sb.toString();
+      }
+      
+      public Msg(String imsi) {
+          type = IMSI_TYPE;
+          msg_time = System.currentTimeMillis();
+          data = imsi;
+      }
+      
+      public String getDateFormat() {
+          Date date = new Date(msg_time);
+          return date.toString();
+      }
+      
+      public String toString() {
+          String ret = "";
+          if (type == GPS_TYPE) {
+              String country, city;
+              if (latitude == 37.33 && longitude == 126.58) {
+                  country = "South Korea";
+                  city = "Seoul";
+              } else if (latitude == 40.42 && longitude == 74.0) {
+                  country = "USA";
+                  city = "New York";
+              } else if (latitude == 38.54 && longitude == 77.2) {
+                  country = "USA";
+                  city = "Washington";
+              } else if (latitude == 37.59 && longitude == 23.43) {
+                  country = "Greece";
+                  city = "Athens";
+              } else if (latitude == 40.25 && longitude == 3.42) {
+                  country = "Spain";
+                  city = "Madrid";
+              } else if (latitude == 51.30 && longitude == 0.7) {
+                  country = "Great Britain";
+                  city = "London";
+              } else if (latitude == 48.51 && longitude == 2.21) {
+                  country = "France";
+                  city = "Paris";
+              } else if (latitude == 39.54 && longitude == 116.24) {
+                  country = "China";
+                  city = "Beijing";
+              } else if (latitude == 41.53 && longitude == 12.28) {
+                  country = "Italy";
+                  city = "Rome";
+              } else if (latitude == 35.41 && longitude == 139.41) {
+                  country = "Japan";
+                  city = "Tokyo";
+              } else {
+                  country = "Unknown";
+                  city = "Unknown";
+              }
+              ret = country + ":" + city;
+          } else if (type == IMSI_TYPE) {
+              String countryID = data.substring(0, 3);
+              String mobileNetworkCodeID = data.substring(3, 6);
+              String country = "";
+              String mobileNetworkCode = "";
+              
+              //msin = deviceID.substring(6);
+              if (countryID.compareTo("450") == 0) {
+                  country = "South Korea";
+                  if (mobileNetworkCodeID.compareTo("002") == 0)
+                      mobileNetworkCode = "KT";
+                  else if (mobileNetworkCodeID.compareTo("003") == 0)
+                      mobileNetworkCode = "Power 017";
+                  else
+                      mobileNetworkCode = "Unknown";
+              } else if (countryID.compareTo("234") == 0) {
+                  country = "Great Britain";
+                  if (mobileNetworkCodeID.compareTo("000") == 0)
+                      mobileNetworkCode = "BT";
+                  else if (mobileNetworkCodeID.compareTo("001") == 0)
+                      mobileNetworkCode = "Vectone Mobile";
+                  else
+                      mobileNetworkCode = "Unknown";
+              } else if (countryID.compareTo("310") == 0) {
+                  country = "USA";
+                  if (mobileNetworkCodeID.compareTo("053") == 0)
+                      mobileNetworkCode = "Virgin Mobile";
+                  else if (mobileNetworkCodeID.compareTo("054") == 0)
+                      mobileNetworkCode = "Alltel US";
+                  else
+                      mobileNetworkCode = "Unknown";
+              } else {
+                  country = "Unknown";
+                  mobileNetworkCode = "Unknown";
+              }
+              ret = country + ":" + mobileNetworkCode;
+          }
+          return ret;
+      }
+  }
 
   public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
       // An item was selected. You can retrieve the selected item using
@@ -75,12 +187,11 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		builder = new AlertDialog.Builder(context);
 		builder.setTitle("Test");
 		builder.setMessage("HI");
+		
 		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.cancel();
-
 			}
 		});
 		
@@ -120,99 +231,35 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
   }
 
   public void sendMessage(View view) {
-    Log.e("JIKK:", "sendMessage");
-    gpsTracker.getLocation();
-    double latitude = gpsTracker.getLatitude();
-    double longitude = gpsTracker.getLongitude();
-    String deviceID, country, mobileNetworkCode, countryID, mobileNetworkCodeID, msin, city;
-
     EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
     EditText portTxt = (EditText) findViewById(R.id.port);
-    textView = (TextView) findViewById(R.id.textView1);
-
-    if (spinnerId <0) {
+    Msg msg = null;
+    
+    if (spinnerId < 0) {
+        //Error processing needed from here.
     } else {
-        String msg = String.valueOf(spinner.getSelectedItem());
 
         if (spinnerId == 0) {  // Getting Location
-        	if (latitude == 37.33 && longitude == 126.58) {
-        		country = "South Korea";
-        		city = "Seoul";
-        	} else if (latitude == 40.42 && longitude == 74.0) {
-        		country = "USA";
-        		city = "New York";
-        	} else if (latitude == 38.54 && longitude == 77.2) {
-        		country = "USA";
-        		city = "Washington";
-        	} else if (latitude == 37.59 && longitude == 23.43) {
-        		country = "Greece";
-        		city = "Athens";
-        	} else if (latitude == 40.25 && longitude == 3.42) {
-        		country = "Spain";
-        		city = "Madrid";
-        	} else if (latitude == 51.30 && longitude == 0.7) {
-        		country = "Great Britain";
-        		city = "London";
-        	} else if (latitude == 48.51 && longitude == 2.21) {
-        		country = "France";
-        		city = "Paris";
-        	} else if (latitude == 39.54 && longitude == 116.24) {
-        		country = "China";
-        		city = "Beijing";
-        	} else if (latitude == 41.53 && longitude == 12.28) {
-        		country = "Italy";
-        		city = "Rome";
-        	} else if (latitude == 35.41 && longitude == 139.41) {
-        		country = "Japan";
-        		city = "Tokyo";
-        	} else {
-        		country = "Unknown";
-        		city = "Unknown";
-        	}
-        	
-        	msg += ": Country: " + country + " city: " + city + " ->	 " + Double.toString(latitude) + "," + Double.toString(longitude); 
-        	//msg += ":" + Double.toString(latitude) + "," + Double.toString(longitude);
-
+            gpsTracker.getLocation();
+            double latitude = gpsTracker.getLatitude();
+            double longitude = gpsTracker.getLongitude();
+                    	
+            msg = new Msg(latitude, longitude);
+                               
         } else if (spinnerId == 1) {
+            String deviceID;
         	deviceID = findDeviceID();
-        	countryID = deviceID.substring(0, 3);
-        	mobileNetworkCodeID = deviceID.substring(3, 6);
-        	msin = deviceID.substring(6);
-        	if (countryID.compareTo("450") == 0) {
-        		country = "South Korea";
-        		if (mobileNetworkCodeID.compareTo("002") == 0)
-        			mobileNetworkCode = "KT";
-        		else if (mobileNetworkCodeID.compareTo("003") == 0)
-        			mobileNetworkCode = "Power 017";
-        		else
-        			mobileNetworkCode = "Unknown";
-        	} else if (countryID.compareTo("234") == 0) {
-        		country = "Great Britain";
-        		if (mobileNetworkCodeID.compareTo("000") == 0)
-        			mobileNetworkCode = "BT";
-        		else if (mobileNetworkCodeID.compareTo("001") == 0)
-        			mobileNetworkCode = "Vectone Mobile";
-        		else
-        			mobileNetworkCode = "Unknown";
-        	} else if (countryID.compareTo("310") == 0) {
-        		country = "USA";
-        		if (mobileNetworkCodeID.compareTo("053") == 0)
-        			mobileNetworkCode = "Virgin Mobile";
-        		else if (mobileNetworkCodeID.compareTo("054") == 0)
-        			mobileNetworkCode = "Alltel US";
-        		else
-        			mobileNetworkCode = "Unknown";
-        	} else {
-        		country = "Unknown";
-        		mobileNetworkCode = "Unknown";
-        	}
-        	msg += ": Country: " + country + " Mobile Network Code: " + mobileNetworkCode + " -> " + deviceID;
-        		
-//            msg += ":" + findDeviceID();
+        	msg = new Msg(deviceID);
         }
-        SocketTask task = new SocketTask(this, ipAddrTxt.getText().toString(),
+
+        SocketTask task0 = new SocketTask(this, ipAddrTxt.getText().toString(),
                 portTxt.getText().toString());
-        task.execute(new String[] {msg});
+        
+        SocketTask task1 = new SocketTask(this, ipAddrTxt.getText().toString(),
+                portTxt.getText().toString());
+        
+        task0.execute(new String[] {"DATE: " + msg.getDateFormat()});
+        task1.execute(new String[] {"MSG: " + msg.toString()});
     }
   }
 
@@ -221,25 +268,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
     TelephonyManager m_telephonyManager = (TelephonyManager)
                 getSystemService(Context.TELEPHONY_SERVICE);
-    int deviceType = m_telephonyManager.getPhoneType();
-
-    switch (deviceType) {
-        case (TelephonyManager.PHONE_TYPE_GSM):
-          Log.e("JIKK:", "TelephonyManager.PHONE_TYPE_GSM");
-          break;
-        case (TelephonyManager.PHONE_TYPE_CDMA):
-          Log.e("JIKK:", "TelephonyManager.PHONE_TYPE_CDMA");
-          break;
-        case (TelephonyManager.PHONE_TYPE_NONE):
-          Log.e("JIKK:", "TelephonyManager.PHONE_TYPE_NONE");
-          break;
-        default:
-          Log.e("JIKK:", "TelephonyManager.default");
-          break;
-      }
-
+    
     deviceID = m_telephonyManager.getSubscriberId();
-    Log.e("JIKK:", "deviceID:" + deviceID);
     return deviceID;
  }
 
@@ -283,13 +313,16 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
       return ret;
     }
+    
     @Override
-      protected void onPostExecute(String result) {
-
-    	Intent i = new Intent(MainActivity.this, ResultActivity.class);
-    	i.putExtra("result", result);
-    	startActivity(i);
-      //textView.setText(result);
+      protected void onPostExecute(String result_) {
+        if (result_.contains("MSG:")) {
+            Intent i = new Intent(MainActivity.this, ResultActivity.class);
+            i.putExtra("result", result_);
+            startActivity(i);
+        } else {
+            //do not post this message. 
+        }
     }
   }
 }

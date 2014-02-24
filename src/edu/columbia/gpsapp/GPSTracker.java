@@ -73,9 +73,7 @@ public class GPSTracker extends Service implements LocationListener {
                 
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
-                	Log.e("JIKK-GPS", "GPS is enabled");
 
-                    Log.e("JIKK-GPS", "Location is null");
                     locationManager.requestLocationUpdates(
                         LocationManager.GPS_PROVIDER,
                         MIN_TIME_BW_UPDATES,
