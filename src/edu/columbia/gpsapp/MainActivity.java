@@ -238,6 +238,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
   public void sendMessage(View view) {
     EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
     EditText portTxt = (EditText) findViewById(R.id.port);
+    String txt = null;
     Msg msg = null;
     
     if (spinnerId < 0) {
@@ -248,23 +249,23 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             gpsTracker.getLocation();
             double latitude = gpsTracker.getLatitude();
             double longitude = gpsTracker.getLongitude();
-                    	
+            
+            txt = Double.toString(latitude) + ":" + Double.toHexString(longitude);
             msg = new Msg(latitude, longitude);
                                
         } else if (spinnerId == 1) {
             String deviceID;
         	deviceID = findDeviceID();
+        	
+        	txt = deviceID;
         	msg = new Msg(deviceID);
         }
 
-        SocketTask task0 = new SocketTask(this, ipAddrTxt.getText().toString(),
+        SocketTask task = new SocketTask(this, ipAddrTxt.getText().toString(),
                 portTxt.getText().toString());
         
-        SocketTask task1 = new SocketTask(this, ipAddrTxt.getText().toString(),
-                portTxt.getText().toString());
-        
-        task0.execute(new String[] {"DATE: " + msg.getDateFormat()});
-        task1.execute(new String[] {"MSG: " + msg.toString()});
+        task.execute(new String[] {txt, "DATE: " + msg.getDateFormat(), "MSG: " + msg.toString()});
+
     }
   }
 
