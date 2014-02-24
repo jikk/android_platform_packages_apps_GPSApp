@@ -38,9 +38,11 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
   //private TextView textView;
   private Spinner spinner;
   private long spinnerId = -1;
-  private long interval = 5;
+  private long interval = 15;
   private AlertDialog.Builder builder;
   private ScheduledThreadPoolExecutor exec;
+  private boolean dialogBeingShown = false;
+  
   
   class Msg {
       int type = 0;
@@ -185,13 +187,14 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		gpsTracker = new GPSTracker(this);
 		exec = new ScheduledThreadPoolExecutor(1);
 		builder = new AlertDialog.Builder(context);
-		builder.setTitle("Test");
-		builder.setMessage("HI");
+		builder.setTitle("Random Event");
+		builder.setMessage("Plz, Kill me!");
 		
 		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.cancel();
+                dialogBeingShown = false;
 			}
 		});
 		
@@ -201,11 +204,10 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			public void onClick(DialogInterface dialog, int which) {
 				exec.shutdown();
 				dialog.cancel();
-
+                dialogBeingShown = false;
 			}
 		});
 		exec.scheduleWithFixedDelay (new Runnable() {
-
 			@Override
 			public void run() {
 				runOnUiThread(new Runnable() {
@@ -213,9 +215,12 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
-						AlertDialog alertDialog =builder.create();
-						alertDialog.show();
-						
+					    if (dialogBeingShown == false) {
+					        dialogBeingShown = true;
+					        builder.setMessage((new Date()).toString());
+					        AlertDialog alertDialog =builder.create();
+					        alertDialog.show();
+					    }
 					}
 				});
 				
