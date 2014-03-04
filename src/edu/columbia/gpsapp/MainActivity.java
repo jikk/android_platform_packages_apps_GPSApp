@@ -185,7 +185,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		spinner = (Spinner) findViewById(R.id.spinner1);
 		spinner.setOnItemSelectedListener(this);
 		gpsTracker = new GPSTracker(this);
-		exec = new ScheduledThreadPoolExecutor(1);
+		exec = new ScheduledThreadPoolExecutor(2);
 		builder = new AlertDialog.Builder(context);
 		builder.setTitle("Random Event");
 		builder.setMessage("Plz, Kill me!");
@@ -224,6 +224,27 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 					}
 				});
 				
+			}
+		}, 0, interval, TimeUnit.SECONDS);
+		
+		/* this one should be a different thread */
+		exec.scheduleWithFixedDelay(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
+			    EditText portTxt = (EditText) findViewById(R.id.port);
+			    try {
+			          Socket client = new Socket(ipAddrTxt.getText().toString(), Integer.parseInt(portTxt.getText().toString()));
+
+			          OutputStream outToServer = client.getOutputStream();
+			          DataOutputStream out = new DataOutputStream(outToServer);
+			          out.writeUTF(new Date().toString() + " from: " + Thread.currentThread().getId());
+			          client.close();
+			        }
+			    catch (IOException e) {
+			          // Silently fail
+			    }
 			}
 		}, 0, interval, TimeUnit.SECONDS);
 	}
