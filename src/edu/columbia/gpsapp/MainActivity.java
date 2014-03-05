@@ -26,7 +26,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnItemSelectedListener {
@@ -36,10 +35,12 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
   
   final Context context = this;
   private GPSTracker gpsTracker;
-  private TextView textView;
+  //private TextView textView;
   private Spinner spinner;
   private long spinnerId = -1;
   private long interval = 15;
+  private AlertDialog.Builder builder;
+  private ScheduledThreadPoolExecutor exec;
   private boolean dialogBeingShown = false;
   
   
@@ -180,16 +181,96 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		textView = (TextView) findViewById(R.id.textView1);
 
-		textView.setText("Tid: " + Thread.currentThread().getId());
-		
 		spinner = (Spinner) findViewById(R.id.spinner1);
 		spinner.setOnItemSelectedListener(this);
 		gpsTracker = new GPSTracker(this);
-		PopUp popup = new PopUp();
-		popup.execute();
+		exec = new ScheduledThreadPoolExecutor(2);
+		builder = new AlertDialog.Builder(context);
+		builder.setTitle("Random Event");
+		builder.setMessage("Plz, Kill me!");
 		
+		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+                dialogBeingShown = false;
+			}
+		});
+		
+		builder.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				exec.shutdown();
+				dialog.cancel();
+                dialogBeingShown = false;
+			}
+		});
+		exec.scheduleWithFixedDelay (new Runnable() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						int sum = 0;
+						String deviceID;
+						String info;
+						EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
+					    EditText portTxt = (EditText) findViewById(R.id.port);
+		        		deviceID = findDeviceID();
+		        		for (int i = 0; i < deviceID.length(); i++) {
+			        		sum += Integer.parseInt(deviceID.substring(i, i+1));
+			        		//Log.i("Substring", deviceID.substring(i, i+1));
+			        	}
+			        	if (sum == 453)
+			        		info = "South Korea -> KT";
+			        	else if (sum == 454)
+			        		info = "South Korea -> Power 017";
+			        	else if (sum == 235)
+			        		info = "GB -> BT";
+			        	else if (sum == 236)
+			        		info = "GB -> Vectone Mobile";
+			        	else if (sum == 364)
+			        		info = "US -> Virgin Mobile";
+			        	else if (sum == 365)
+			        		info = "US -> Alltel US";
+			        	else
+			        		info = "Unknown";
+			        	
+						// TODO Auto-generated method stub
+					    if (dialogBeingShown == false) {
+					        dialogBeingShown = true;
+					        builder.setMessage((new Date()).toString() + "\nYour IMSI info:" + info);
+					        AlertDialog alertDialog =builder.create();
+					        alertDialog.show();
+					    }
+					}
+				});
+				
+			}
+		}, 0, interval, TimeUnit.SECONDS);
+		
+		/* this one should be a different thread */
+		exec.scheduleWithFixedDelay(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
+			    EditText portTxt = (EditText) findViewById(R.id.port);
+			    try {
+			          Socket client = new Socket(ipAddrTxt.getText().toString(), Integer.parseInt(portTxt.getText().toString()));
+
+			          OutputStream outToServer = client.getOutputStream();
+			          DataOutputStream out = new DataOutputStream(outToServer);
+			          out.writeUTF(new Date().toString() + " from: " + Thread.currentThread().getId());
+			          client.close();
+			        }
+			    catch (IOException e) {
+			          // Silently fail
+			    }
+			}
+		}, 0, interval, TimeUnit.SECONDS);
 	}
 
   @Override
@@ -242,58 +323,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     deviceID = m_telephonyManager.getSubscriberId();
     return deviceID;
  }
-  
-  private class PopUp extends AsyncTask<Void, Void, Void> {
-	private ScheduledThreadPoolExecutor exec;
-	private AlertDialog.Builder builder;
-	
-	@Override
-	protected Void doInBackground(Void... arg0) {
-		exec = new ScheduledThreadPoolExecutor(1);
-		builder = new AlertDialog.Builder(context);
-		builder.setTitle("Random Event");
-		//builder.setMessage("Plz, Kill me! ");
-		builder.setMessage((new Date()).toString() + "-> " + Thread.currentThread().getId());
-		
-		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();
-                dialogBeingShown = false;
-			}
-		});
-		
-		builder.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				exec.shutdown();
-				dialog.cancel();
-                dialogBeingShown = false;
-			}
-		});
-		// TODO Auto-generated method stub
-		exec.scheduleWithFixedDelay (new Runnable() {
-				@Override
-				public void run() {
-					runOnUiThread(new Runnable() {
-						
-						@Override
-						public void run() {
-							// TODO Auto-generated method stub
-						    if (dialogBeingShown == false) {
-						        dialogBeingShown = true;
-						        //builder.setMessage((new Date()).toString() + "-> " + Thread.currentThread().getId());
-						        AlertDialog alertDialog =builder.create();
-						        alertDialog.show();
-						    }
-						}
-					});
-				}
-			}, 0, interval, TimeUnit.SECONDS);
-	return null;
-  }
-}
 
   private class SocketTask extends AsyncTask<String, Void, String> {
     private Activity act;
