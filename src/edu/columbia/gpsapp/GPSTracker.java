@@ -31,14 +31,14 @@ public class GPSTracker extends Service implements LocationListener {
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
 	 
 	// The minimum time between updates in milliseconds
-	private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+	private static final long MIN_TIME_BW_UPDATES = 1000 * 1 * 1; // 1 sec.
 	 
 	// Declaring a Location Manager
 	protected LocationManager locationManager;	
 
 	public Location getLocation() {
         try {
-          Log.e("JIKK-GPS", "getLocation called");
+            Log.e("JIKK-GPS", "getLocation called");
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
  
@@ -73,42 +73,40 @@ public class GPSTracker extends Service implements LocationListener {
                 
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
-                	Log.e("JIKK-GPS", "GPS is enabled");
-                    if (location == null) {
-                    	Log.e("JIKK-GPS", "Location is null");
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
 
-                        if (locationManager != null) {
-                        	Log.e("JIKK-GPS", "LocationManager is not null");
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (location != null) {
-                            	Log.e("JIKK-GPS", "Location is not null (2)");
-                                latitude = location.getLatitude();
-                                longitude = location.getLongitude();
-                            } else {
-                            	Log.e("JIKK-GPS", "Location is null (2)");
-                            }
+                    locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+
+                    if (locationManager != null) {
+                        Log.e("JIKK-GPS", "LocationManager is not null");
+                        location = locationManager
+                            .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        if (location != null) {
+                            Log.e("JIKK-GPS", "Location is not null (2)");
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
+                        } else {
+                        Log.e("JIKK-GPS", "Location is null (2)");
                         }
+                    } else {
+                        Log.e("JIKK-GPS", "LocationManager is null");
                     }
                 } else {
                 	Log.e("JIKK-GPS", "GPS is NOT enabled");
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
- 
         return location;
     }
 	
 	@Override
 	public void onLocationChanged(Location arg0) {
 	    // TODO Auto-generated method stub
+        Log.e("JIKK-GPS", "onLocationChanged");
 	    latitude = arg0.getLatitude();
 	    longitude = arg0.getLongitude();
 	}
@@ -128,7 +126,8 @@ public class GPSTracker extends Service implements LocationListener {
 	@Override
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
-
+        Log.e("JIKK-GPS", "onStatusChanged");
+        getLocation();
 	}
 
 	@Override
