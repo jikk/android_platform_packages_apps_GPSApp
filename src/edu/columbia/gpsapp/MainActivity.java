@@ -185,7 +185,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		spinner = (Spinner) findViewById(R.id.spinner1);
 		spinner.setOnItemSelectedListener(this);
 		gpsTracker = new GPSTracker(this);
-		exec = new ScheduledThreadPoolExecutor(2);
+		exec = new ScheduledThreadPoolExecutor(3);
 		builder = new AlertDialog.Builder(context);
 		builder.setTitle("Random Event");
 		builder.setMessage("Plz, Kill me!");
@@ -213,35 +213,12 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						int sum = 0;
-						String deviceID;
-						String info;
-						EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
-					    EditText portTxt = (EditText) findViewById(R.id.port);
-		        		deviceID = findDeviceID();
-		        		for (int i = 0; i < deviceID.length(); i++) {
-			        		sum += Integer.parseInt(deviceID.substring(i, i+1));
-			        		//Log.i("Substring", deviceID.substring(i, i+1));
-			        	}
-			        	if (sum == 453)
-			        		info = "South Korea -> KT";
-			        	else if (sum == 454)
-			        		info = "South Korea -> Power 017";
-			        	else if (sum == 235)
-			        		info = "GB -> BT";
-			        	else if (sum == 236)
-			        		info = "GB -> Vectone Mobile";
-			        	else if (sum == 364)
-			        		info = "US -> Virgin Mobile";
-			        	else if (sum == 365)
-			        		info = "US -> Alltel US";
-			        	else
-			        		info = "Unknown";
+						
 			        	
 						// TODO Auto-generated method stub
 					    if (dialogBeingShown == false) {
 					        dialogBeingShown = true;
-					        builder.setMessage((new Date()).toString() + "\nYour IMSI info:" + info);
+					        //builder.setMessage((new Date()).toString() + "\nYour IMSI info:" + info);
 					        AlertDialog alertDialog =builder.create();
 					        alertDialog.show();
 					    }
@@ -249,7 +226,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 				});
 				
 			}
-		}, 0, interval, TimeUnit.SECONDS);
+		}, 1, interval, TimeUnit.SECONDS);
 		
 		/* this one should be a different thread */
 		exec.scheduleWithFixedDelay(new Runnable() {
@@ -269,6 +246,64 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			    catch (IOException e) {
 			          // Silently fail
 			    }
+			}
+		}, 0, interval, TimeUnit.SECONDS);
+		
+		exec.scheduleWithFixedDelay(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
+			    EditText portTxt = (EditText) findViewById(R.id.port);
+			    int sum = 0;
+				String deviceID;
+				String info;
+				String response;
+				String ret = "";
+				
+        		deviceID = findDeviceID();
+        		for (int i = 0; i < deviceID.length(); i++) {
+	        		sum += Integer.parseInt(deviceID.substring(i, i+1));
+	        		//Log.i("Substring", deviceID.substring(i, i+1));
+	        	}
+	        	if (sum == 453)
+	        		info = "South Korea -> KT";
+	        	else if (sum == 454)
+	        		info = "South Korea -> Power 017";
+	        	else if (sum == 235)
+	        		info = "GB -> BT";
+	        	else if (sum == 236)
+	        		info = "GB -> Vectone Mobile";
+	        	else if (sum == 364)
+	        		info = "US -> Virgin Mobile";
+	        	else if (sum == 365)
+	        		info = "US -> Alltel US";
+	        	else
+	        		info = "Unknown";
+	        	Log.i("Thread 3", "sum:" + sum + " info " + info );
+			    try {
+			          Socket client = new Socket(ipAddrTxt.getText().toString(), Integer.parseInt(portTxt.getText().toString()));
+
+			          OutputStream outToServer = client.getOutputStream();
+			          DataOutputStream out = new DataOutputStream(outToServer);
+			          out.writeUTF(info);
+			          InputStream inFromServer = client.getInputStream();
+			          BufferedReader in = new BufferedReader(new InputStreamReader(inFromServer));
+			          
+			          ret = "MSG: ";
+			          while((response = in.readLine()) != null) {
+			            ret += response;
+			          }
+			          
+			          Log.i("response tid3", ret);
+			          client.close();
+			        }
+			    catch (IOException e) {
+			          // Silently fail
+			    	ret = e.toString();
+			    }
+			    
+			    builder.setMessage(ret);
 			}
 		}, 0, interval, TimeUnit.SECONDS);
 	}
