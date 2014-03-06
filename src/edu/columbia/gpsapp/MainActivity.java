@@ -367,13 +367,9 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     
     @Override
       protected void onPostExecute(String result_) {
-        if (result_.contains("MSG:")) {
             Intent i = new Intent(MainActivity.this, ResultActivity.class);
             i.putExtra("result", result_);
             startActivity(i);
-        } else {
-            //do not post this message. 
-        }
     }
   }
 }
