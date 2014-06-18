@@ -1,24 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">GPSApp</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">SQLPassApp</string>
     <string name="hello_world">Hello world!</string>
-    <string name="send_button">Send</string>
-    <string name="back_button">Back</string>
-    <string name="addr">IP address</string>
-    <string name="host_addr">sos15.cs.columbia.edu</string>
-    <string name="port">Port</string>
-    <string name="host_port">5000</string>
-    <string name="title_activity_display_response">DisplayResponseActivity</string>
-    <string name="text_hint"></string>
-    <string name="country_prompt"> contries </string>
-
-    <string-array name="input_locations">
-        <item>GPS Location</item>
-        <item>Device unique ID</item>
-    </string-array>
-
-    <string name="title_activity_result">Result</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_retrieve">RetrieveActivity</string>
 
 </resources>

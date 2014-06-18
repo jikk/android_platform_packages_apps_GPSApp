@@ -6,62 +6,67 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity" >
-
-   	<LinearLayout
-   	    android:id="@+id/layout1"
-   	    android:layout_width="wrap_content"
-   	    android:layout_height="wrap_content"
-   	    android:orientation="vertical" >
-
-   	    <Spinner
-        	android:id="@+id/spinner1"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content" 
-        	android:entries="@array/input_locations"
-        	android:prompt="@string/country_prompt" />
-   	    
-   		<EditText
-   		    android:id="@+id/addr"
-   		    android:layout_width="wrap_content"
-   		    android:layout_height="wrap_content"
-   		    android:ems="10"
-   		    android:hint="@string/addr"
-   		    android:text="@string/host_addr"
-   		    android:inputType="text" >
-   		    <requestFocus />
-   		</EditText>
-
-        <EditText
-        android:id="@+id/port"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="number" 
-        android:hint="@string/port" 
-        android:text="@string/host_port" 
-        />
-    
-    <Button
-        android:id="@+id/send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/send_button"
-        android:onClick="sendMessage" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:id="@+id/layout2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/layout1"
-        android:orientation="vertical" >
+    tools:context="edu.columbia.sqlpassapp.MainActivity$PlaceholderFragment" >
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/text_hint"
-        android:textAppearance="?android:attr/textAppearanceMedium" />    
-    </LinearLayout>
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="21dp"
+        android:layout_marginTop="20dp"
+        android:text="Username" />
+
+    <EditText
+        android:id="@+id/input_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="17dp"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/input_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="14dp"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/input_username"
+        android:layout_below="@+id/input_username"
+        android:layout_marginTop="16dp"
+        android:text="Password" />
+
+    <Button
+        android:id="@+id/switch_retrieve"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/add"
+        android:layout_alignBottom="@+id/add"
+        android:layout_alignRight="@+id/input_password"
+        android:onClick="retrieveAct"
+        android:text="Retrieve" />
+
+    <Button
+        android:id="@+id/add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/input_password"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="69dp"
+        android:onClick="saveEntry"
+        android:text="Add" />
+
 </RelativeLayout>
