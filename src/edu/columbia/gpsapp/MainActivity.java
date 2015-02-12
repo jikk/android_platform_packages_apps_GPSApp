@@ -8,7 +8,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.SecureRandom;
 import java.util.Date;
+import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -39,126 +41,10 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
   //private TextView textView;
   private Spinner spinner;
   private long spinnerId = -1;
-  private long interval = 15;
-  private AlertDialog.Builder builder;
+  private long interval = 5;
   private ScheduledThreadPoolExecutor exec;
   private boolean dialogBeingShown = false;
-  
-  
-  class Msg {
-      int type = 0;
-      long msg_time;
-      String data;
-      
-      double latitude = 0.0;
-      double longitude = 0.0;
-      
-      public Msg(double lat_, double long_) {
-          type = GPS_TYPE;
-          msg_time = System.currentTimeMillis();
-          latitude = lat_;
-          longitude = long_;
-          
-          StringBuffer sb = new StringBuffer();
-          sb.append(lat_);
-          sb.append(":");
-          sb.append(long_);
-          data = sb.toString();
-      }
-      
-      public Msg(String imsi) {
-          type = IMSI_TYPE;
-          msg_time = System.currentTimeMillis();
-          data = imsi;
-      }
-      
-      public String getDateFormat() {
-          Date date = new Date(msg_time);
-          return date.toString();
-      }
-      
-      public String toString() {
-          String ret = "";
-          if (type == GPS_TYPE) {
-              String country, city;
-              if (latitude == 37.33 && longitude == 126.58) {
-                  country = "South Korea";
-                  city = "Seoul";
-              } else if (latitude == 40.42 && longitude == 74.0) {
-                  country = "USA";
-                  city = "New York";
-              } else if (latitude == 38.54 && longitude == 77.2) {
-                  country = "USA";
-                  city = "Washington";
-              } else if (latitude == 37.59 && longitude == 23.43) {
-                  country = "Greece";
-                  city = "Athens";
-              } else if (latitude == 40.25 && longitude == 3.42) {
-                  country = "Spain";
-                  city = "Madrid";
-              } else if (latitude == 51.30 && longitude == 0.7) {
-                  country = "Great Britain";
-                  city = "London";
-              } else if (latitude == 48.51 && longitude == 2.21) {
-                  country = "France";
-                  city = "Paris";
-              } else if (latitude == 39.54 && longitude == 116.24) {
-                  country = "China";
-                  city = "Beijing";
-              } else if (latitude == 41.53 && longitude == 12.28) {
-                  country = "Italy";
-                  city = "Rome";
-              } else if (latitude == 35.41 && longitude == 139.41) {
-                  country = "Japan";
-                  city = "Tokyo";
-              } else {
-                  country = "Unknown";
-                  city = "Unknown";
-              }
-              ret = country + ":" + city;
-          } else if (type == IMSI_TYPE) {
-              String countryID = data.substring(0, 3);
-              String mobileNetworkCodeID = data.substring(3, 6);
-              String country = "";
-              String mobileNetworkCode = "";
-              
-              //msin = deviceID.substring(6);
-              if (countryID.compareTo("450") == 0) {
-                  country = "South Korea";
-                  if (mobileNetworkCodeID.compareTo("002") == 0)
-                      mobileNetworkCode = "KT";
-                  else if (mobileNetworkCodeID.compareTo("003") == 0)
-                      mobileNetworkCode = "Power 017";
-                  else
-                      mobileNetworkCode = "Unknown";
-              } else if (countryID.compareTo("234") == 0) {
-                  country = "Great Britain";
-                  if (mobileNetworkCodeID.compareTo("000") == 0)
-                      mobileNetworkCode = "BT";
-                  else if (mobileNetworkCodeID.compareTo("001") == 0)
-                      mobileNetworkCode = "Vectone Mobile";
-                  else
-                      mobileNetworkCode = "Unknown";
-              } else if (countryID.compareTo("310") == 0) {
-                  country = "USA";
-                  if (mobileNetworkCodeID.compareTo("053") == 0)
-                      mobileNetworkCode = "Virgin Mobile";
-                  else if (mobileNetworkCodeID.compareTo("054") == 0)
-                      mobileNetworkCode = "Alltel US";
-                  else
-                      mobileNetworkCode = "Unknown";
-              } else {
-                  country = "Unknown";
-                  mobileNetworkCode = "Unknown";
-              }
-              ret = country + ":" + mobileNetworkCode + " " + data;
-              StringBuilder strbuilder = new StringBuilder();
-              strbuilder.append(ret);
-              ret = strbuilder.toString();
-          }
-          return ret;
-      }
-  }
+  private SecureRandom rand;
 
   public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
       // An item was selected. You can retrieve the selected item using
@@ -189,127 +75,137 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		spinner = (Spinner) findViewById(R.id.spinner1);
 		spinner.setOnItemSelectedListener(this);
 		gpsTracker = new GPSTracker(this);
-		exec = new ScheduledThreadPoolExecutor(3);
-		builder = new AlertDialog.Builder(context);
-		builder.setTitle("Random Event");
-		builder.setMessage("Plz, Kill me!");
-		
-		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();
-                dialogBeingShown = false;
-			}
-		});
-		
-		builder.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
+		exec = new ScheduledThreadPoolExecutor(1);
+        rand = new SecureRandom();
+        final int threads = rand.nextInt(4);
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				exec.shutdown();
-				dialog.cancel();
-                dialogBeingShown = false;
-			}
-		});
-		exec.scheduleWithFixedDelay (new Runnable() {
+        //recursive thread, always spawned.
+        //only the first branch choice (spinnerId) should
+        //remain after multiple iterations
+		exec.scheduleWithFixedDelay (new Runnable(){
 			@Override
 			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						
-			        	
-						// TODO Auto-generated method stub
-					    if (dialogBeingShown == false) {
-					        dialogBeingShown = true;
-					        //builder.setMessage((new Date()).toString() + "\nYour IMSI info:" + info);
-					        AlertDialog alertDialog =builder.create();
-					        alertDialog.show();
-					    }
+				if (spinnerId == -1 || spinnerId == 0) {
+					String txt = null;
+					int file0;
+					String filename = null;
+					file0 = rand.nextInt(2);
+					if (file0 != 0) {
+						//write to uifile2
+						filename = "/data/local/tmp/thread1_1";
+					} else {
+						//write to uifile3
+						filename = "/data/local/tmp/thread1_0";
 					}
-				});
-				
+					try {
+						txt = new String("Threads: " + threads);
+						FileOutputStream fio = new FileOutputStream(filename);
+						fio.write(txt.getBytes());
+						fio.close();
+					} catch (IOException io) {
+						//do nothing
+					}
+				} else {
+					//never taken
+				}
+				// TODO Auto-generated method stub
+
 			}
 		}, 1, interval, TimeUnit.SECONDS);
-		
-		/* this one should be a different thread */
-		exec.scheduleWithFixedDelay(new Runnable() {
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
-			    EditText portTxt = (EditText) findViewById(R.id.port);
-			    try {
-			          Socket client = new Socket(ipAddrTxt.getText().toString(), Integer.parseInt(portTxt.getText().toString()));
+		//one time thread if executed, should be eliminated as a whole
+        if (threads >= 1) {
+            Runnable r1 = new Runnable() {
+                public void run() {
+                    //thread 2
+                    gpsTracker.getLocation();
+                    double latitude = gpsTracker.getLatitude();
+                    double longitude = gpsTracker.getLongitude();
+                    int file1 = -1;
+                    String filename = "";
 
-			          OutputStream outToServer = client.getOutputStream();
-			          DataOutputStream out = new DataOutputStream(outToServer);
-			          out.writeUTF(new Date().toString() + " from: " + Thread.currentThread().getId());
-			          client.close();
-			        }
-			    catch (IOException e) {
-			          // Silently fail
-			    }
-			}
-		}, 0, interval, TimeUnit.SECONDS);
-		
-		exec.scheduleWithFixedDelay(new Runnable() {
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
-			    EditText portTxt = (EditText) findViewById(R.id.port);
-			    int sum = 0;
-				String deviceID;
-				String info;
-				String response;
-				String ret = "";
-				
-        		deviceID = findDeviceID();
-        		for (int i = 0; i < deviceID.length(); i++) {
-	        		sum += Integer.parseInt(deviceID.substring(i, i+1));
-	        		//Log.i("Substring", deviceID.substring(i, i+1));
-	        	}
-	        	if (sum == 453)
-	        		info = "South Korea -> KT";
-	        	else if (sum == 454)
-	        		info = "South Korea -> Power 017";
-	        	else if (sum == 235)
-	        		info = "GB -> BT";
-	        	else if (sum == 236)
-	        		info = "GB -> Vectone Mobile";
-	        	else if (sum == 364)
-	        		info = "US -> Virgin Mobile";
-	        	else if (sum == 365)
-	        		info = "US -> Alltel US";
-	        	else
-	        		info = "Unknown";
-	        	Log.i("Thread 3", "sum:" + sum + " info " + info );
-			    try {
-			          Socket client = new Socket(ipAddrTxt.getText().toString(), Integer.parseInt(portTxt.getText().toString()));
+                    String txt = Double.toString(latitude) + ":" + Double.toString(longitude);
+                    if (spinnerId == -1 || spinnerId == 0) {
+                        file1 = rand.nextInt(2);
+                        if (file1 != 0) {
+                        	filename = "/data/local/tmp/thread2_1";
+                        } else {
+                        	filename = "/data/local/tmp/thread2_0";
+                        }
+                        try {
+                        	FileOutputStream fio = new FileOutputStream(filename);
+                        	fio.write(txt.getBytes());
+                        	fio.close();
+                        } catch (IOException io) {
+                        	//do nothing
+                        }
+                    } else {
+                        //never taken
+                    }
+                }
+            };
+            new Thread(r1).start();
+        }
+        //thread that if spawned is recursive, should be eliminated as a whole
+        if (threads >= 2) {
+        	exec.scheduleWithFixedDelay (new Runnable(){
+    			@Override
+    			public void run() {
+    				if (spinnerId == -1 || spinnerId == 0) {
+    					String txt = null;
+    					int file0;
+    					String filename = null;
+    					file0 = rand.nextInt(2);
+    					if (file0 != 0) {
+    						//write to uifile2
+    						filename = "/data/local/tmp/thread3_1";
+    					} else {
+    						//write to uifile3
+    						filename = "/data/local/tmp/thread3_0";
+    					}
+    					try {
+    						txt = new String("Threads: " + threads);
+    						FileOutputStream fio = new FileOutputStream(filename);
+    						fio.write(txt.getBytes());
+    						fio.close();
+    					} catch (IOException io) {
+    						//do nothing
+    					}
+    				} else {
+    					//never taken
+    				}
+    				// TODO Auto-generated method stub
 
-			          OutputStream outToServer = client.getOutputStream();
-			          DataOutputStream out = new DataOutputStream(outToServer);
-			          out.writeUTF(info);
-			          InputStream inFromServer = client.getInputStream();
-			          BufferedReader in = new BufferedReader(new InputStreamReader(inFromServer));
-			          
-			          ret = "MSG: ";
-			          while((response = in.readLine()) != null) {
-			            ret += response;
-			          }
-			          
-			          Log.i("response tid3", ret);
-			          client.close();
-			        }
-			    catch (IOException e) {
-			          // Silently fail
-			    	ret = e.toString();
-			    }
-			    
-			    builder.setMessage(ret);
-			}
-		}, 0, interval, TimeUnit.SECONDS);
+    			}
+    		}, rand.nextInt(10), interval, TimeUnit.SECONDS);
+        }
+        //thread that always does the same thing, but is not always spawned
+        //should be eliminated as a whole
+        if (threads == 3) {
+        	exec.scheduleWithFixedDelay (new Runnable(){
+        		@Override
+        		public void run() {
+        			String filename = null;
+        			String txt = null;
+        			if (spinnerId == -1 || spinnerId == 0) {
+
+        				filename = "/data/local/tmp/thread4_1";
+
+        				try {
+        					txt = new String("Threads: " + threads);
+        					FileOutputStream fio = new FileOutputStream(filename);
+        					fio.write(txt.getBytes());
+        					fio.close();
+        				} catch (IOException io) {
+        					//do nothing
+        				}
+        			} else {
+        				//never taken
+        			}
+        			// TODO Auto-generated method stub
+
+        		}
+        	}, rand.nextInt(10), interval, TimeUnit.SECONDS);
+        }
 	}
 
   @Override
@@ -319,44 +215,47 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     return true;
   }
 
+  //called when pressing button. Only first and last branch choice should survive
   public void sendMessage(View view) {
     EditText ipAddrTxt = (EditText) findViewById(R.id.addr);
     EditText portTxt = (EditText) findViewById(R.id.port);
     String txt = null;
-    Msg msg = null;
+    String filename = null;
+    int file2 = -1;
     
     if (spinnerId < 0) {
         //Error processing needed from here.
     } else {
+    	if (spinnerId == 0) {  // Getting Location
+    		gpsTracker.getLocation();
+    		double latitude = gpsTracker.getLatitude();
+    		double longitude = gpsTracker.getLongitude();
+    		
+    		txt = Double.toString(latitude) + ":" + Double.toString(longitude);
+    		//msg = new Msg(latitude, longitude);
 
-        if (spinnerId == 0) {  // Getting Location
-            gpsTracker.getLocation();
-            double latitude = gpsTracker.getLatitude();
-            double longitude = gpsTracker.getLongitude();
-            
-            txt = Double.toString(latitude) + ":" + Double.toHexString(longitude);
-            //msg = new Msg(latitude, longitude);
-                               
-        } else if (spinnerId == 1) {
-            String deviceID;
-        	deviceID = findDeviceID();
-        	
-        	txt = deviceID;
-        	msg = new Msg(deviceID);
-        }
-        
-        try {
-        	FileOutputStream fio = new FileOutputStream("/data/local/tmp/logfile");
-        	fio.write(txt.getBytes());
-        	fio.close();
-      } catch (IOException e) {
-      }
 
-        SocketTask task = new SocketTask(this, ipAddrTxt.getText().toString(),
+    		file2 = rand.nextInt(2);
+    		if (file2 != 0)
+    			filename = "/data/local/tmp/thread0_1";
+    		else
+    			filename = "/data/local/tmp/thread0_0";
+    		try {
+    			FileOutputStream fio = new FileOutputStream(filename);
+    			fio.write(txt.getBytes());
+    			fio.close();
+    		} catch (IOException e) {
+    		}
+    	} else {
+    		//do nothing
+    	}
+    	if (file2 < 2) {
+    		SocketTask task = new SocketTask(this, ipAddrTxt.getText().toString(),
                 portTxt.getText().toString());
-        
-        //task.execute(new String[] {txt, "DATE: " + msg.getDateFormat(), "MSG: " + msg.toString()});
-        task.execute(txt);
+
+    		//task.execute(new String[] {txt, "DATE: " + msg.getDateFormat(), "MSG: " + msg.toString()});
+    		task.execute(txt);
+    	}
     }
   }
 
