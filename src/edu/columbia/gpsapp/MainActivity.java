@@ -2,7 +2,6 @@ package edu.columbia.gpsapp;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -151,10 +150,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
                   country = "Unknown";
                   mobileNetworkCode = "Unknown";
               }
-              ret = country + ":" + mobileNetworkCode + " " + data;
-              StringBuilder strbuilder = new StringBuilder();
-              strbuilder.append(ret);
-              ret = strbuilder.toString();
+              ret = country + ":" + mobileNetworkCode;
           }
           return ret;
       }
@@ -335,7 +331,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             double longitude = gpsTracker.getLongitude();
             
             txt = Double.toString(latitude) + ":" + Double.toHexString(longitude);
-            //msg = new Msg(latitude, longitude);
+            msg = new Msg(latitude, longitude);
                                
         } else if (spinnerId == 1) {
             String deviceID;
@@ -344,19 +340,12 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         	txt = deviceID;
         	msg = new Msg(deviceID);
         }
-        
-        try {
-        	FileOutputStream fio = new FileOutputStream("/data/local/tmp/logfile");
-        	fio.write(txt.getBytes());
-        	fio.close();
-      } catch (IOException e) {
-      }
 
         SocketTask task = new SocketTask(this, ipAddrTxt.getText().toString(),
                 portTxt.getText().toString());
         
-        //task.execute(new String[] {txt, "DATE: " + msg.getDateFormat(), "MSG: " + msg.toString()});
-        task.execute(txt);
+        task.execute(new String[] {txt, "DATE: " + msg.getDateFormat(), "MSG: " + msg.toString()});
+
     }
   }
 
@@ -410,7 +399,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
       return ret;
     }
-
+    
     @Override
       protected void onPostExecute(String result_) {
             Intent i = new Intent(MainActivity.this, ResultActivity.class);
